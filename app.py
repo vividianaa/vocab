@@ -1,8 +1,14 @@
+import os
+from os.path import join, dirname
+from dotenv import load_dotenv
 from flask import Flask, request, render_template, jsonify, redirect, url_for
 from pymongo import MongoClient
 import requests
 from datetime import datetime
 from bson import ObjectId
+
+dotenv_path = join(dirname(__file__), '.env')
+load_dotenv(dotenv_path)
 
 app = Flask(__name__)
 
@@ -34,7 +40,7 @@ def detail(keyword):
 
     if not definitions:
         return redirect(url_for(
-            'salah',
+            'error',
             word=keyword
         ))
     if type(definitions[0]) is str:
@@ -65,13 +71,6 @@ def error():
         suggestions=suggestions
         )
 
-@app.route('/salah')
-def salah():
-    word = request.args.get('word')
-    return render_template(
-        'salah.html',
-        word=word,
-        )
 
 @app.route('/api/save_word', methods=['POST'])
 def save_word():
@@ -112,7 +111,11 @@ def get_exs():
             'example':example.get('example'),
             'id': str(example.get('_id')),
         })
-    return jsonify({'result': 'success'})
+    return jsonify({
+        'result': 'success',
+        'examples': examples,
+        })
+
 
 @app.route('/api/save_ex', methods=['POST'])
 def save_ex():
